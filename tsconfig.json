@@ -1,0 +1,8 @@
+{
+    "compilerOptions": {
+        "isolatedModules": false,
+        "target": "ES6",
+        "lib": ["ES6", "WebWorker", "DOM"]
+    },
+    "include": ["./src/**/*.ts"]
+}
