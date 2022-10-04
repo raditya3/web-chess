@@ -1,7 +1,7 @@
-import { Board } from '../Board';
-import { assertPositionBounds } from '../utils/check-position-bounds';
-import { ChessPiece } from './ChessPiece';
-import { Params } from './Types';
+import { Board } from '../../Board';
+import { assertPositionBounds } from '../../utils/check-position-bounds';
+import { ChessPiece } from '../ChessPiece';
+import { Params } from '../Types';
 
 class Queen extends ChessPiece {
     private getMoves = (
@@ -45,7 +45,7 @@ class Queen extends ChessPiece {
         return possibilities.filter((move) => {
             const nb = board.clone();
             nb.movePiece(this, move[0], move[1], true);
-            const [newCheck, _] = nb.detectCheck();
+            const newCheck = nb.detectCheck()[0];
             if (newCheck && newCheck.color === this.color) {
                 return false;
             } else {

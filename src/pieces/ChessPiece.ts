@@ -1,10 +1,11 @@
 import { Board } from '../Board';
 import { Params } from './Types';
-import * as PieceClasses from './all-pieces';
+type Primitive = string | boolean | number;
 /**
  * TODO: Add test cases for each piece. Will probably use jest
  */
 abstract class ChessPiece {
+    specialInfo?: { [key: string]: Primitive | Primitive[] };
     constructor(params: Params) {
         this.position = params.pos;
         this.color = params.color;
@@ -37,19 +38,8 @@ abstract class ChessPiece {
             position: JSON.stringify(this.position),
             name: this.name,
             color: this.color,
+            specialInfo: this.specialInfo,
         });
-    };
-    static parse = (literal: string): ChessPiece => {
-        const parsedParam = JSON.parse(literal);
-        for (const key of Object.keys(PieceClasses)) {
-            if (key.toLowerCase() === parsedParam.name.toLowerCase()) {
-                return new PieceClasses[key]({
-                    color: parsedParam.color,
-                    pos: JSON.parse(parsedParam.position),
-                }) as ChessPiece;
-            }
-        }
-        throw new Error(`Cannor parse literal ${literal}`);
     };
 }
 

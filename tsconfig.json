@@ -2,7 +2,10 @@
     "compilerOptions": {
         "isolatedModules": false,
         "target": "ES6",
-        "lib": ["ES6", "WebWorker", "DOM"]
+        "module": "ESNext",
+        "moduleResolution": "Node",
+        "esModuleInterop": true,
+        "lib": ["ESNext", "WebWorker", "DOM"]
     },
     "include": ["./src/**/*.ts"]
 }

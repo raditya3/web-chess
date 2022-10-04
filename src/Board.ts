@@ -2,6 +2,7 @@ import { ChessPiece } from './pieces/ChessPiece';
 import { getImage } from './utils/get-image';
 import * as PieceClasses from './pieces/all-pieces';
 import { checkCastlingPossible } from './pieces/King';
+import { constructChessPiecefromLiteral } from './utils/chess-piece-factory';
 
 /**
  * Todo: Implement pawn promotion logic
@@ -9,8 +10,8 @@ import { checkCastlingPossible } from './pieces/King';
 
 class Board {
     private pieces: ChessPiece[] = [];
-    private dynamicValueAtPos = {};
-    private isInCheckedState: [ChessPiece, ChessPiece[]] = null;
+    private dynamicValueAtPos: { [key: string]: ChessPiece } = {};
+    private isInCheckedState: [ChessPiece, ChessPiece[]] | null = null;
     private validMovesInCheck: {
         position: [number, number];
         piece: ChessPiece;
@@ -90,6 +91,9 @@ class Board {
             }
             currentPiece.position[0] = pos_x;
             currentPiece.position[1] = pos_y;
+            if (currentPiece.name === 'rook' || currentPiece.name === 'king') {
+                currentPiece.specialInfo['moved'] = true;
+            }
             this.addChessPiece(currentPiece);
             this.isInCheckedState = null;
             if (piece.name === 'king') {
@@ -144,7 +148,7 @@ class Board {
                 return this.pieces[i];
             }
         }
-        this.dynamicValueAtPos[`${pos_x}_${pos_y}`] = null;
+        this.dynamicValueAtPos[`${pos_x}_${pos_y}`] = undefined;
         return null;
     }
     public addChessPiece(piece: ChessPiece) {
@@ -226,6 +230,7 @@ class Board {
         return this.pieces
             .filter((p) => p.color === enemy_color)
             .filter((currentPiece) => {
+                // Piece cannot threaten its own spot
                 if (
                     currentPiece.position[0] === pos_x &&
                     currentPiece.position[1] === pos_y
@@ -334,11 +339,35 @@ class Board {
     };
 
     public stringify = (): string => {
-        return JSON.stringify(this.pieces.map((p) => p.stringify()));
+        const tmp_dynamicValueAtPos: { [key: string]: string } = {};
+        const tmp_isInCheckedState: [string, string[]] | null =
+            this.isInCheckedState === null
+                ? null
+                : [
+                      this.isInCheckedState[0].stringify(),
+                      this.isInCheckedState[1].map((v) => v.stringify()),
+                  ];
+        Object.keys(this.dynamicValueAtPos).forEach((v) => {
+            if (this.dynamicValueAtPos[v] === undefined) {
+                return;
+            }
+            tmp_dynamicValueAtPos[v] = this.dynamicValueAtPos[v].stringify();
+        });
+
+        return JSON.stringify({
+            pieces: JSON.stringify(this.pieces.map((p) => p.stringify())),
+            dynamicValueAtPos: tmp_dynamicValueAtPos,
+            isInCheckedState: tmp_isInCheckedState,
+        });
     };
     public static parse = (literal: string): Board => {
+        const parsedLiteral: {
+            pieces: string;
+            dynamicValueAtPos: { [key: string]: string };
+            isInCheckedState: [string, string[]] | null;
+        } = JSON.parse(literal);
         const nBoard = new Board();
-        (JSON.parse(literal) as string[])
+        (JSON.parse(parsedLiteral.pieces) as string[])
             .map((v) => {
                 const pieceData: {
                     position: string;
@@ -361,7 +390,24 @@ class Board {
                 }
                 nBoard.addChessPiece(p);
             });
+        Object.keys(parsedLiteral.dynamicValueAtPos).forEach((v) => {
+            nBoard.dynamicValueAtPos[v] = constructChessPiecefromLiteral(
+                parsedLiteral.dynamicValueAtPos[v]
+            );
+        });
+        const isInCheckedState: [ChessPiece, ChessPiece[]] =
+            parsedLiteral.isInCheckedState === null
+                ? null
+                : [
+                      constructChessPiecefromLiteral(
+                          parsedLiteral.isInCheckedState[0]
+                      ),
+                      parsedLiteral.isInCheckedState[1].map((v) =>
+                          constructChessPiecefromLiteral(v)
+                      ),
+                  ];
 
+        nBoard.isInCheckedState = isInCheckedState;
         return nBoard;
     };
 }

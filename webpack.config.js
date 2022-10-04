@@ -3,9 +3,13 @@ const path = require('path');
 const HTMLWebpackPlugin = require('html-webpack-plugin');
 
 const chunkLoadOrder = ['global', 'main', 'worker'];
-
+/** @type {import('webpack').Configuration} */
 const config = {
     mode: process.env.NODE_ENV || 'development',
+    optimization: {
+        usedExports: true,
+        sideEffects: true,
+    },
     entry: {
         main: './src/index.ts',
         global: './src/initialize-global.ts',
@@ -29,8 +33,10 @@ const config = {
             {
                 test: /\.(png|jpe?g|gif)$/i,
                 loader: 'file-loader',
+
                 options: {
                     name: '[path][name].[ext]',
+                    publicPath: '/',
                 },
             },
         ],

@@ -1,10 +1,5 @@
 import { Board } from './Board';
-import { Bishop } from './pieces/Bishop';
-import { King } from './pieces/King';
-import { Knight } from './pieces/Knight';
-import { Pawn } from './pieces/Pawn';
-import { Queen } from './pieces/Queen';
-import { Rook } from './pieces/Rook';
+import { Bishop, King, Knight, Pawn, Queen, Rook } from './pieces/all-pieces';
 export function setPieces(board: Board) {
     for (let i = 0; i < 8; i++) {
         board.addChessPiece(

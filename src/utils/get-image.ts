@@ -1,5 +1,4 @@
 const imageCache: { [key: string]: HTMLImageElement } = {};
-const images = require.context('../../assets/pieces', true);
 export const getImage = (
     color: 'black' | 'white',
     name: string
@@ -17,7 +16,9 @@ export const getImage = (
             resolve(img);
         };
         img.onerror = () => reject(new Error(`Failed to load ${img.src}`));
-        img.src = images(`./${color}/${name}.png`).default;
+        import(`../../assets/pieces/${color}/${name}.png`).then((im) => {
+            img.src = im.default;
+        });
     });
     return res;
 };

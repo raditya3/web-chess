@@ -1,7 +1,7 @@
-import { Board } from '../Board';
-import { assertPositionBounds } from '../utils/check-position-bounds';
-import { ChessPiece } from './ChessPiece';
-import { Params } from './Types';
+import { Board } from '../../Board';
+import { assertPositionBounds } from '../../utils/check-position-bounds';
+import { ChessPiece } from '../ChessPiece';
+import { Params } from '../Types';
 class Knight extends ChessPiece {
     constructor(params: Params) {
         super(params);
@@ -43,7 +43,7 @@ class Knight extends ChessPiece {
         return possibleMoves.filter((move) => {
             const nb = board.clone();
             nb.movePiece(this, move[0], move[1], true);
-            const [newCheck, _] = nb.detectCheck();
+            const newCheck = nb.detectCheck()[0];
             if (newCheck && newCheck.color === this.color) {
                 return false;
             } else {
@@ -55,7 +55,7 @@ class Knight extends ChessPiece {
     position: [number, number];
     color: 'white' | 'black';
     isThreateningAtXY: (pos_x: number, pos_y: number, board: Board) => boolean =
-        (pos_x, pos_y, board) => {
+        (pos_x, pos_y) => {
             assertPositionBounds([pos_x, pos_y]);
             if (
                 Math.abs(pos_x - this.position[0]) == 1 &&

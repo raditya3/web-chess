@@ -1,7 +1,7 @@
-import { Params } from './Types';
-import { Board } from '../Board';
-import { assertPositionBounds } from '../utils/check-position-bounds';
-import { ChessPiece } from './ChessPiece';
+import { Params } from './../Types';
+import { Board } from '../../Board';
+import { assertPositionBounds } from '../../utils/check-position-bounds';
+import { ChessPiece } from '../ChessPiece';
 /**
  * Todo: Implement En passant
  */
@@ -18,7 +18,7 @@ class Pawn extends ChessPiece {
     };
 
     isThreateningAtXY: (pos_x: number, pos_y: number, board: Board) => boolean =
-        (pos_x, pos_y, board) => {
+        (pos_x, pos_y) => {
             assertPositionBounds([pos_x, pos_y]);
             if (
                 this.color === 'black' &&
@@ -51,7 +51,11 @@ class Pawn extends ChessPiece {
             if (board.getValueAtPos(pos_x, pos_y - 1) === null) {
                 possibleMoves.push([pos_x, pos_y - 1]);
             }
-            if (board.getValueAtPos(pos_x, 4) === null && pos_y == 6) {
+            if (
+                board.getValueAtPos(pos_x, 4) === null &&
+                pos_y == 6 &&
+                board.getValueAtPos(pos_x, 3) === null
+            ) {
                 possibleMoves.push([pos_x, 4]);
             }
             if (pos_x < 7) {
@@ -76,7 +80,11 @@ class Pawn extends ChessPiece {
             if (board.getValueAtPos(pos_x, pos_y + 1) === null) {
                 possibleMoves.push([pos_x, pos_y + 1]);
             }
-            if (board.getValueAtPos(pos_x, 3) === null && pos_y == 1) {
+            if (
+                board.getValueAtPos(pos_x, 3) === null &&
+                pos_y == 1 &&
+                board.getValueAtPos(pos_x, 2) === null
+            ) {
                 possibleMoves.push([pos_x, 3]);
             }
             if (pos_x < 7) {
@@ -99,7 +107,7 @@ class Pawn extends ChessPiece {
         return possibleMoves.filter((move) => {
             const nb = board.clone();
             nb.movePiece(this, move[0], move[1], true);
-            const [newCheck, _] = nb.detectCheck();
+            const newCheck = nb.detectCheck()[0];
             if (newCheck && newCheck.color === this.color) {
                 return false;
             } else {

@@ -1,5 +1,6 @@
 import { Board } from './Board';
 import { ChessPiece } from './pieces/ChessPiece';
+import { constructChessPiecefromLiteral } from './utils/chess-piece-factory';
 import { setPercentage } from './utils/util-events';
 const webWorker = new Worker('worker.js');
 export const performMachineTurn = (board: Board): Promise<boolean> => {
@@ -24,7 +25,7 @@ export const performMachineTurn = (board: Board): Promise<boolean> => {
                 }
                 case 'result': {
                     const response = data.response;
-                    const piece = ChessPiece.parse(response[0]);
+                    const piece = constructChessPiecefromLiteral(response[0]);
                     board.movePiece(piece, response[1], response[2]);
                     resolve(true);
                     break;

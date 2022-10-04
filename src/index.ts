@@ -1,5 +1,5 @@
 /**
- * TODO: Implement UI to detect win, lose and tie situaltion
+ * TODO: Implement UI to detect win, lose and tie situation
  */
 
 import { Board } from './Board';
@@ -8,10 +8,44 @@ import { performMachineTurn } from './process-computer';
 import { setPieces } from './set-pieces';
 import { setPercentage } from './utils/util-events';
 
-const board = new Board();
+let board = new Board();
+const previousBoardState: Board[] = [];
+const previousButton = document.getElementById('previous') as HTMLButtonElement;
+previousButton.disabled = true;
+const nextButton = document.getElementById('next') as HTMLButtonElement;
+nextButton.disabled = true;
+let currentIndex = -1;
+(window as any).board = board;
+const changeCurrentIndex = (change: 'incr' | 'decr') => {
+    if (change === 'incr') {
+        currentIndex++;
+    } else {
+        currentIndex--;
+    }
+    if (currentIndex === 0) {
+        previousButton.disabled = true;
+    } else {
+        previousButton.disabled = false;
+    }
+    if (currentIndex === previousBoardState.length - 1) {
+        nextButton.disabled = true;
+    } else {
+        nextButton.disabled = false;
+    }
+    return currentIndex;
+};
+
+const recordState = (board: Board) => {
+    if (currentIndex < previousBoardState.length - 1) {
+        previousBoardState.splice(currentIndex + 1);
+    }
+
+    previousBoardState.push(board.clone());
+    changeCurrentIndex('incr');
+};
 
 setPieces(board);
-
+recordState(board);
 board.render();
 const boundingRect = canvas.getBoundingClientRect();
 let selectedPiece: ChessPiece | null = null;
@@ -70,12 +104,31 @@ canvas.addEventListener('click', (ev) => {
         if (res) {
             board.render().then(() => {
                 isHumanTurn = false;
-                performMachineTurn(board).then((v) => {
-                    board.render().then((v) => {
+                performMachineTurn(board).then(() => {
+                    recordState(board);
+                    board.render().then(() => {
                         isHumanTurn = true;
                     });
                 });
             });
         }
     }
+});
+
+previousButton.addEventListener('click', () => {
+    if (previousButton.disabled || isHumanTurn === false) {
+        return;
+    }
+    board = previousBoardState[changeCurrentIndex('decr')].clone();
+    (window as any).board = board;
+    board.render();
+});
+
+nextButton.addEventListener('click', () => {
+    if (nextButton.disabled || isHumanTurn === false) {
+        return;
+    }
+    board = previousBoardState[changeCurrentIndex('incr')].clone();
+    (window as any).board = board;
+    board.render();
 });
