@@ -48,6 +48,7 @@ const config = {
         new HTMLWebpackPlugin({
             template: './src/index.html',
             filename: 'index.html',
+            favicon: './src/favicon.ico',
             chunksSortMode: (a, b) => {
                 if (chunkLoadOrder.indexOf(a) === chunkLoadOrder.indexOf(b)) {
                     return 0;
