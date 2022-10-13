@@ -94,11 +94,8 @@ class King extends ChessPiece {
         this.name = 'king';
     }
 
-    getPossibleMoves: (
-        pos_x: number,
-        pos_y: number,
-        board: Board
-    ) => [number, number][] = (pos_x, pos_y, board) => {
+    getPossibleMoves: (board: Board) => [number, number][] = (board) => {
+        const [pos_x, pos_y] = this.position;
         assertPositionBounds([pos_x, pos_y]);
         const possibleMoves: [number, number][] = [];
         possibleMoves.push([pos_x, pos_y + 1]);

@@ -13,11 +13,7 @@ abstract class ChessPiece {
     /**
      * @returns returns all possible moves
      */
-    abstract getPossibleMoves: (
-        pos_x: number,
-        pos_y: number,
-        board: Board
-    ) => [number, number][];
+    abstract getPossibleMoves: (board: Board) => [number, number][];
     name: string;
     position: [number, number];
     color: 'white' | 'black';

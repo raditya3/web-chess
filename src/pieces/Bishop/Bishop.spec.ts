@@ -59,7 +59,7 @@ describe('test movement on empty board', () => {
         const bishopPiece = new Bishop({ color: 'white', pos: initPos });
         board.addChessPiece(bishopPiece);
         const possibleMoves = bishopPiece
-            .getPossibleMoves(initPos[0], initPos[1], board)
+            .getPossibleMoves(board)
             .map((m) => `${m[0]}_${m[1]}`);
 
         expect(possibleMoves.length).toEqual(
@@ -77,7 +77,7 @@ describe('test movement on empty board', () => {
 
         board.addChessPiece(bishopPiece);
         const possibleMoves = bishopPiece
-            .getPossibleMoves(initPos[0], initPos[1], board)
+            .getPossibleMoves(board)
             .map((m) => `${m[0]}_${m[1]}`);
         expect(possibleMoves.length).toEqual(
             actualPossibleMoves(initPos).length

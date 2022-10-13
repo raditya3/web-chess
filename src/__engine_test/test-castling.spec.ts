@@ -13,7 +13,7 @@ describe('check castling of the king', () => {
         board.addChessPiece(rook);
         board.addChessPiece(king);
         const possibleMoves = king
-            .getPossibleMoves(king.position[0], king.position[1], board)
+            .getPossibleMoves(board)
             .map((m) => `${m[0]}_${m[1]}`);
         expect(possibleMoves.includes(`2_7`)).toBeTruthy();
     });
@@ -25,7 +25,7 @@ describe('check castling of the king', () => {
         board.addChessPiece(king);
         board.addChessPiece(blackRook);
         const possibleMoves = king
-            .getPossibleMoves(king.position[0], king.position[1], board)
+            .getPossibleMoves(board)
             .map((m) => `${m[0]}_${m[1]}`);
         expect(possibleMoves.includes(`1_7`)).toBeFalsy();
     });
@@ -36,7 +36,7 @@ describe('check castling of the king', () => {
         board.addChessPiece(king);
         board.movePiece(rook, 1, 7);
         const possibleMoves = king
-            .getPossibleMoves(king.position[0], king.position[1], board)
+            .getPossibleMoves(board)
             .map((m) => `${m[0]}_${m[1]}`);
         expect(possibleMoves.includes(`2_7`)).toBeFalsy();
     });
@@ -48,11 +48,7 @@ describe('check castling of the king', () => {
         board.movePiece(king, 3, 7);
         const repositionedWhiteKing = board.getValueAtPos(3, 7);
         const possibleMoves = repositionedWhiteKing
-            .getPossibleMoves(
-                repositionedWhiteKing.position[0],
-                repositionedWhiteKing.position[1],
-                board
-            )
+            .getPossibleMoves(board)
             .map((m) => `${m[0]}_${m[1]}`);
         expect(possibleMoves.includes(`1_7`)).toBeFalsy();
     });

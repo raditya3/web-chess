@@ -60,11 +60,7 @@ export const getMoveScore = (
         if (maxScore > 1000) {
             return;
         }
-        const allPossibleMoves = _piece.getPossibleMoves(
-            _piece.position[0],
-            _piece.position[1],
-            board
-        );
+        const allPossibleMoves = _piece.getPossibleMoves(board);
         allPossibleMoves.forEach((move) => {
             if (maxScore > 1000) {
                 return;

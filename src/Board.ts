@@ -29,11 +29,7 @@ class Board {
         return this.pieces.map((v) => v.clone());
     };
     public validMove = (piece: ChessPiece, pos_x, pos_y): boolean => {
-        const possibleMoves = piece.getPossibleMoves(
-            piece.position[0],
-            piece.position[1],
-            this
-        );
+        const possibleMoves = piece.getPossibleMoves(this);
         const validated = !!possibleMoves.find(
             (move) => move[0] === pos_x && move[1] === pos_y
         );
@@ -294,11 +290,7 @@ class Board {
             (p) => p.color === king.color
         );
         friendlyPieces.forEach((piece) => {
-            const allPossibleMoves = piece.getPossibleMoves(
-                piece.position[0],
-                piece.position[1],
-                this
-            );
+            const allPossibleMoves = piece.getPossibleMoves(this);
             allPossibleMoves.forEach((move) => {
                 const newBoard = this.clone();
                 newBoard.movePiece(piece, move[0], move[1]);

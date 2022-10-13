@@ -33,11 +33,8 @@ class Rook extends ChessPiece {
         }
         return possibleMoves;
     };
-    getPossibleMoves: (
-        pos_x: number,
-        pos_y: number,
-        board: Board
-    ) => [number, number][] = (pos_x, pos_y, board) => {
+    getPossibleMoves: (board: Board) => [number, number][] = (board) => {
+        const [pos_x, pos_y] = this.position;
         assertPositionBounds([pos_x, pos_y]);
         const possibleMoves: [number, number][] = [];
         possibleMoves.push(...this.getMoves(pos_x, pos_y, board, +1, 0));

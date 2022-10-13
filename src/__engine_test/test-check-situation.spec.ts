@@ -35,11 +35,7 @@ describe('test check situations', () => {
         const blackQueen = board.getValueAtPos(0, 7);
         const whiteQueen = board.getValueAtPos(4, 2);
         board.movePiece(whiteQueen, 4, 6);
-        const possibleMoves = blackQueen.getPossibleMoves(
-            blackQueen.position[0],
-            blackQueen.position[1],
-            board
-        );
+        const possibleMoves = blackQueen.getPossibleMoves(board);
         expect(possibleMoves.length).toBe(0);
     });
 
@@ -49,11 +45,7 @@ describe('test check situations', () => {
         board.movePiece(whiteQueen, 6, 7);
         const blackQueenPiece = board.getValueAtPos(0, 1);
         const possibleMoves = blackQueenPiece
-            .getPossibleMoves(
-                blackQueenPiece.position[0],
-                blackQueenPiece.position[1],
-                board
-            )
+            .getPossibleMoves(board)
             .map((m) => `${m[0]}_${m[1]}`);
         expect(possibleMoves.length).toBe(0);
     });
@@ -64,11 +56,7 @@ describe('test check situations', () => {
         board.movePiece(whiteQueen, 6, 7);
         const blackKingPiece = board.getValueAtPos(4, 5);
         const possibleMoves = blackKingPiece
-            .getPossibleMoves(
-                blackKingPiece.position[0],
-                blackKingPiece.position[1],
-                board
-            )
+            .getPossibleMoves(board)
             .map((m) => `${m[0]}_${m[1]}`);
         expect(
             possibleMoves.includes(`3_4`) ||

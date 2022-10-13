@@ -9,11 +9,8 @@ class Knight extends ChessPiece {
         this.position = params.pos;
     }
 
-    getPossibleMoves: (
-        pos_x: number,
-        pos_y: number,
-        board: Board
-    ) => [number, number][] = (pos_x, pos_y, board) => {
+    getPossibleMoves: (board: Board) => [number, number][] = (board) => {
+        const [pos_x, pos_y] = this.position;
         assertPositionBounds([pos_x, pos_y]);
         let possibleMoves: [number, number][] = [];
         possibleMoves.push([pos_x + 2, pos_y - 1]);

@@ -39,11 +39,8 @@ class Pawn extends ChessPiece {
             return false;
         };
 
-    getPossibleMoves: (
-        pos_x: number,
-        pos_y: number,
-        board: Board
-    ) => [number, number][] = (pos_x, pos_y, board) => {
+    getPossibleMoves: (board: Board) => [number, number][] = (board) => {
+        const [pos_x, pos_y] = this.position;
         assertPositionBounds([pos_x, pos_y]);
         const possibleMoves = [];
         if (this.color === 'black' && pos_y - 1 >= 0) {
@@ -54,7 +51,7 @@ class Pawn extends ChessPiece {
             if (
                 board.getValueAtPos(pos_x, 4) === null &&
                 pos_y == 6 &&
-                board.getValueAtPos(pos_x, 3) === null
+                board.getValueAtPos(pos_x, 5) === null
             ) {
                 possibleMoves.push([pos_x, 4]);
             }
