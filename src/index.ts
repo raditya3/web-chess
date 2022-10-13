@@ -15,7 +15,7 @@ previousButton.disabled = true;
 const nextButton = document.getElementById('next') as HTMLButtonElement;
 nextButton.disabled = true;
 let currentIndex = -1;
-(window as any).board = board;
+window['board'] = board;
 const changeCurrentIndex = (change: 'incr' | 'decr') => {
     if (change === 'incr') {
         currentIndex++;
@@ -79,11 +79,7 @@ canvas.addEventListener('click', (ev) => {
             board.render([selectedCell_x, selectedCell_y]);
         } else {
             const isPossible = !!selectedPiece
-                .getPossibleMoves(
-                    selectedPiece.position[0],
-                    selectedPiece.position[1],
-                    board
-                )
+                .getPossibleMoves(board)
                 .find(
                     (move) =>
                         move[0] === selectedCell_x && move[1] === selectedCell_y
@@ -125,7 +121,7 @@ previousButton.addEventListener('click', () => {
         return;
     }
     board = previousBoardState[changeCurrentIndex('decr')].clone();
-    (window as any).board = board;
+    window['board'] = board;
     board.render();
 });
 
@@ -134,6 +130,6 @@ nextButton.addEventListener('click', () => {
         return;
     }
     board = previousBoardState[changeCurrentIndex('incr')].clone();
-    (window as any).board = board;
+    window['board'] = board;
     board.render();
 });
