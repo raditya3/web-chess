@@ -47,12 +47,13 @@ class Rook extends ChessPiece {
         return possibleMoves.filter((move) => {
             const nb = board.clone();
             nb.movePiece(this, move[0], move[1], true);
-            const newCheck = nb.detectCheck()[0];
-            if (newCheck && newCheck.color === this.color) {
-                return false;
-            } else {
-                return true;
+            const newCheck = nb.detectCheck();
+            for (const checkPiece of newCheck) {
+                if (checkPiece[0].color === this.color) {
+                    return false;
+                }
             }
+            return true;
         });
     };
     isThreateningAtXY: (pos_x: number, pos_y: number, board: Board) => boolean =

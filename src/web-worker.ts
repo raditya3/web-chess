@@ -33,18 +33,19 @@ const scoreWeightage = {
     queen: 7,
     king: 4,
 };
-const getMoveScore = (
+export const getMoveScore = (
     color: 'white' | 'black',
     board: Board,
     depth = 0,
     nPiece: ChessPiece = null,
     nPos_x = -1,
-    nPos_y = -1
+    nPos_y = -1,
+    webWorkerMode = true
 ): [number, ChessPiece, number, number] => {
     if (depth > PREDICTION_DEPTH) {
         return [0, nPiece, nPos_x, nPos_y];
     }
-    if (depth === 0) {
+    if (depth === 0 && webWorkerMode) {
         updateProgress(0, 100);
     }
     let selectedPiece = null;
@@ -83,7 +84,6 @@ const getMoveScore = (
             // Perform next move simulation
             newBoard.movePiece(_piece, move[0], move[1]);
 
-            // TODO: It gets stuck here for some reason
             const isCheckMate = newBoard.detectCheckMate();
             // Do not even consider the move if it results in loosing;
             if (isCheckMate && isCheckMate.color === color) {
@@ -100,7 +100,16 @@ const getMoveScore = (
             }
             // Calculate worst loss from that move
             const lossScore = getMoveScore(enemy_color, newBoard, depth + 1)[0];
+
             const tScore = killScore - lossScore;
+
+            // If no good move is found than play whatever is available
+            if (maxScore < 0) {
+                maxScore = -1;
+                newPos_x = move[0];
+                newPos_y = move[1];
+                selectedPiece = _piece;
+            }
             if (maxScore < tScore) {
                 maxScore = tScore;
                 newPos_x = move[0];
@@ -108,7 +117,7 @@ const getMoveScore = (
                 selectedPiece = _piece;
             }
         });
-        if (depth === 0) {
+        if (depth === 0 && webWorkerMode) {
             updateProgress(_piece_idx + 1, allFriendlyPieces.length);
         }
     });
@@ -129,7 +138,11 @@ onmessage = function (event) {
             const color = data.color;
             const board = Board.parse(data.board);
             const result = getMoveScore(color, board);
-            response = [result[1].stringify(), result[2], result[3]];
+            if (!result[1] && board.detectCheckMate()) {
+                response = [null, null, null];
+            } else {
+                response = [result[1].stringify(), result[2], result[3]];
+            }
             postMessage({
                 type: 'result',
                 data: {

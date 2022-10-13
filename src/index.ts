@@ -45,6 +45,7 @@ const recordState = (board: Board) => {
 };
 
 setPieces(board);
+// board = Board.parse('{ "pieces": "[\\"{ \\\\\\"position\\\\\\": \\\\\\"[2,1]\\\\\\", \\\\\\"name\\\\\\": \\\\\\"pawn\\\\\\", \\\\\\"color\\\\\\": \\\\\\"white\\\\\\"}\\",\\"{ \\\\\\"position\\\\\\": \\\\\\"[4,1]\\\\\\", \\\\\\"name\\\\\\": \\\\\\"pawn\\\\\\", \\\\\\"color\\\\\\": \\\\\\"white\\\\\\"}\\",\\"{ \\\\\\"position\\\\\\": \\\\\\"[7,1]\\\\\\", \\\\\\"name\\\\\\": \\\\\\"pawn\\\\\\", \\\\\\"color\\\\\\": \\\\\\"white\\\\\\"}\\",\\"{ \\\\\\"position\\\\\\": \\\\\\"[1,0]\\\\\\", \\\\\\"name\\\\\\": \\\\\\"knight\\\\\\", \\\\\\"color\\\\\\": \\\\\\"white\\\\\\"}\\",\\"{ \\\\\\"position\\\\\\": \\\\\\"[6,2]\\\\\\", \\\\\\"name\\\\\\": \\\\\\"pawn\\\\\\", \\\\\\"color\\\\\\": \\\\\\"white\\\\\\"}\\",\\"{ \\\\\\"position\\\\\\": \\\\\\"[2,0]\\\\\\", \\\\\\"name\\\\\\": \\\\\\"king\\\\\\", \\\\\\"color\\\\\\": \\\\\\"white\\\\\\", \\\\\\"specialInfo\\\\\\": { \\\\\\"moved\\\\\\": true } }\\",\\"{ \\\\\\"name\\\\\\": \\\\\\"bishop\\\\\\", \\\\\\"color\\\\\\": \\\\\\"white\\\\\\", \\\\\\"position\\\\\\": \\\\\\"[2,2]\\\\\\"}\\",\\"{ \\\\\\"position\\\\\\": \\\\\\"[4,0]\\\\\\", \\\\\\"name\\\\\\": \\\\\\"rook\\\\\\", \\\\\\"color\\\\\\": \\\\\\"white\\\\\\", \\\\\\"specialInfo\\\\\\": { \\\\\\"moved\\\\\\": true } }\\",\\"{ \\\\\\"position\\\\\\": \\\\\\"[7,4]\\\\\\", \\\\\\"name\\\\\\": \\\\\\"pawn\\\\\\", \\\\\\"color\\\\\\": \\\\\\"black\\\\\\"}\\",\\"{ \\\\\\"position\\\\\\": \\\\\\"[6,3]\\\\\\", \\\\\\"name\\\\\\": \\\\\\"pawn\\\\\\", \\\\\\"color\\\\\\": \\\\\\"black\\\\\\"}\\",\\"{ \\\\\\"position\\\\\\": \\\\\\"[0,1]\\\\\\", \\\\\\"name\\\\\\": \\\\\\"queen\\\\\\", \\\\\\"color\\\\\\": \\\\\\"black\\\\\\"}\\",\\"{ \\\\\\"position\\\\\\": \\\\\\"[4,5]\\\\\\", \\\\\\"name\\\\\\": \\\\\\"king\\\\\\", \\\\\\"color\\\\\\": \\\\\\"black\\\\\\", \\\\\\"specialInfo\\\\\\": { \\\\\\"moved\\\\\\": true } }\\",\\"{ \\\\\\"position\\\\\\": \\\\\\"[7,6]\\\\\\", \\\\\\"name\\\\\\": \\\\\\"queen\\\\\\", \\\\\\"color\\\\\\": \\\\\\"white\\\\\\"}\\",\\"{ \\\\\\"position\\\\\\": \\\\\\"[1,4]\\\\\\", \\\\\\"name\\\\\\": \\\\\\"pawn\\\\\\", \\\\\\"color\\\\\\": \\\\\\"black\\\\\\"}\\"]", "dynamicValueAtPos": { "2_1": "{\\"position\\":\\"[2, 1]\\",\\"name\\":\\"pawn\\",\\"color\\":\\"white\\"}", "4_1": "{\\"position\\":\\"[4, 1]\\",\\"name\\":\\"pawn\\",\\"color\\":\\"white\\"}", "7_1": "{\\"position\\":\\"[7, 1]\\",\\"name\\":\\"pawn\\",\\"color\\":\\"white\\"}", "1_0": "{\\"position\\":\\"[1, 0]\\",\\"name\\":\\"knight\\",\\"color\\":\\"white\\"}", "6_2": "{\\"position\\":\\"[6, 2]\\",\\"name\\":\\"pawn\\",\\"color\\":\\"white\\"}", "2_0": "{\\"position\\":\\"[2, 0]\\",\\"name\\":\\"king\\",\\"color\\":\\"white\\",\\"specialInfo\\":{\\"moved\\":true}}", "2_2": "{\\"name\\":\\"bishop\\",\\"color\\":\\"white\\",\\"position\\":\\"[2, 2]\\"}", "4_0": "{\\"position\\":\\"[4, 0]\\",\\"name\\":\\"rook\\",\\"color\\":\\"white\\",\\"specialInfo\\":{\\"moved\\":true}}", "7_4": "{\\"position\\":\\"[7, 4]\\",\\"name\\":\\"pawn\\",\\"color\\":\\"black\\"}", "6_3": "{\\"position\\":\\"[6, 3]\\",\\"name\\":\\"pawn\\",\\"color\\":\\"black\\"}", "0_1": "{\\"position\\":\\"[0, 1]\\",\\"name\\":\\"queen\\",\\"color\\":\\"black\\"}", "4_5": "{\\"position\\":\\"[4, 5]\\",\\"name\\":\\"king\\",\\"color\\":\\"black\\",\\"specialInfo\\":{\\"moved\\":true}}", "7_6": "{\\"position\\":\\"[7, 6]\\",\\"name\\":\\"queen\\",\\"color\\":\\"white\\"}", "1_4": "{\\"position\\":\\"[1, 4]\\",\\"name\\":\\"pawn\\",\\"color\\":\\"black\\"}"}, "isInCheckedState": []}');
 recordState(board);
 board.render();
 const boundingRect = canvas.getBoundingClientRect();
@@ -104,11 +105,15 @@ canvas.addEventListener('click', (ev) => {
         if (res) {
             board.render().then(() => {
                 isHumanTurn = false;
-                performMachineTurn(board).then(() => {
-                    recordState(board);
-                    board.render().then(() => {
-                        isHumanTurn = true;
-                    });
+                performMachineTurn(board).then((res) => {
+                    if (res) {
+                        recordState(board);
+                        board.render().then(() => {
+                            isHumanTurn = true;
+                        });
+                    } else {
+                        alert('I Lost!!');
+                    }
                 });
             });
         }

@@ -8,15 +8,14 @@ describe('check castling of the king', () => {
         board = new Board();
     });
     test('if castling is possible at all', () => {
-        const rook = new Rook({ color: 'white', pos: [0, 7] });
-        const king = new King({ color: 'white', pos: [3, 7] });
+        const rook = new Rook({ color: 'white', pos: [1, 7] });
+        const king = new King({ color: 'white', pos: [4, 7] });
         board.addChessPiece(rook);
         board.addChessPiece(king);
         const possibleMoves = king
             .getPossibleMoves(king.position[0], king.position[1], board)
             .map((m) => `${m[0]}_${m[1]}`);
-        console.table(board.get2dView());
-        expect(possibleMoves.includes(`1_7`)).toBeTruthy();
+        expect(possibleMoves.includes(`2_7`)).toBeTruthy();
     });
     test('castling should not be possible if king is threatened', () => {
         const rook = new Rook({ color: 'white', pos: [0, 7] });
@@ -28,7 +27,33 @@ describe('check castling of the king', () => {
         const possibleMoves = king
             .getPossibleMoves(king.position[0], king.position[1], board)
             .map((m) => `${m[0]}_${m[1]}`);
-        console.table(board.get2dView());
+        expect(possibleMoves.includes(`1_7`)).toBeFalsy();
+    });
+    test('castling should not be possible if rook is moved', () => {
+        const rook = new Rook({ color: 'white', pos: [0, 7] });
+        const king = new King({ color: 'white', pos: [4, 7] });
+        board.addChessPiece(rook);
+        board.addChessPiece(king);
+        board.movePiece(rook, 1, 7);
+        const possibleMoves = king
+            .getPossibleMoves(king.position[0], king.position[1], board)
+            .map((m) => `${m[0]}_${m[1]}`);
+        expect(possibleMoves.includes(`2_7`)).toBeFalsy();
+    });
+    test('castling should not be possible if king is moved', () => {
+        const rook = new Rook({ color: 'white', pos: [0, 7] });
+        const king = new King({ color: 'white', pos: [4, 7] });
+        board.addChessPiece(rook);
+        board.addChessPiece(king);
+        board.movePiece(king, 3, 7);
+        const repositionedWhiteKing = board.getValueAtPos(3, 7);
+        const possibleMoves = repositionedWhiteKing
+            .getPossibleMoves(
+                repositionedWhiteKing.position[0],
+                repositionedWhiteKing.position[1],
+                board
+            )
+            .map((m) => `${m[0]}_${m[1]}`);
         expect(possibleMoves.includes(`1_7`)).toBeFalsy();
     });
 });

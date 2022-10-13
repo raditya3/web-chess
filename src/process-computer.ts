@@ -25,9 +25,15 @@ export const performMachineTurn = (board: Board): Promise<boolean> => {
                 }
                 case 'result': {
                     const response = data.response;
-                    const piece = constructChessPiecefromLiteral(response[0]);
-                    board.movePiece(piece, response[1], response[2]);
-                    resolve(true);
+                    if (response[0] !== null) {
+                        const piece = constructChessPiecefromLiteral(
+                            response[0]
+                        );
+                        board.movePiece(piece, response[1], response[2]);
+                        resolve(true);
+                    } else {
+                        resolve(false);
+                    }
                     break;
                 }
                 case 'logging': {

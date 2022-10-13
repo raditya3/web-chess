@@ -126,8 +126,10 @@ class King extends ChessPiece {
             if (targetValue && targetValue.color === this.color) {
                 return false;
             }
+            const nBoard = board.clone();
+            nBoard.movePiece(this, move[0], move[1], true);
             if (
-                board.isThreatenedAtXY(
+                nBoard.isThreatenedAtXY(
                     move[0],
                     move[1],
                     this.color === 'white' ? 'black' : 'white'

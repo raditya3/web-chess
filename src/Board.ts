@@ -10,8 +10,9 @@ import { constructChessPiecefromLiteral } from './utils/chess-piece-factory';
 
 class Board {
     private pieces: ChessPiece[] = [];
+    public enPassantPieces: ChessPiece[] = [];
     private dynamicValueAtPos: { [key: string]: ChessPiece } = {};
-    private isInCheckedState: [ChessPiece, ChessPiece[]] | null = null;
+    private isInCheckedState: [ChessPiece, ChessPiece[]][] = [];
     private validMovesInCheck: {
         position: [number, number];
         piece: ChessPiece;
@@ -21,7 +22,6 @@ class Board {
         this.pieces.forEach((piece) => {
             newBoard.addChessPiece(piece.clone());
         });
-
         return newBoard;
     };
 
@@ -39,6 +39,7 @@ class Board {
         );
         return validated;
     };
+    // This function does not mutate the ChessPiece passed as argument
     public movePiece = (
         piece: ChessPiece,
         pos_x,
@@ -95,7 +96,7 @@ class Board {
                 currentPiece.specialInfo['moved'] = true;
             }
             this.addChessPiece(currentPiece);
-            this.isInCheckedState = null;
+            this.isInCheckedState = [];
             if (piece.name === 'king') {
                 this.validMovesInCheck = [];
             }
@@ -152,7 +153,7 @@ class Board {
         return null;
     }
     public addChessPiece(piece: ChessPiece) {
-        this.isInCheckedState = null;
+        this.isInCheckedState = [];
         this.pieces.push(piece);
         this.dynamicValueAtPos[`${piece.position[0]}_${piece.position[1]}`] =
             piece;
@@ -174,7 +175,7 @@ class Board {
             (piece) =>
                 piece.position[0] !== pos_x || piece.position[1] !== pos_y
         );
-        this.isInCheckedState = null;
+        this.isInCheckedState = [];
     }
 
     public async render(highlightCell?: [number, number]) {
@@ -245,30 +246,28 @@ class Board {
      * @description detects check condition on board
      * @returns [target king, killer piece]
      */
-    public detectCheck = (): [ChessPiece, ChessPiece[]] => {
-        if (this.isInCheckedState !== null) {
+    public detectCheck = (): [ChessPiece, ChessPiece[]][] => {
+        if (this.isInCheckedState.length > 0) {
             return this.isInCheckedState;
         }
-        let killerPieces: ChessPiece[] = [];
-        const targetKing = this.pieces
+        const result: [ChessPiece, ChessPiece[]][] = [];
+        this.pieces
             .filter((p) => p.name === 'king')
-            .find((kingPiece): boolean => {
+            .forEach((kingPiece) => {
                 const enemy_color =
                     kingPiece.color === 'white' ? 'black' : 'white';
-                killerPieces = this.isThreatenedAtXY(
+                const killerPieces = this.isThreatenedAtXY(
                     kingPiece.position[0],
                     kingPiece.position[1],
                     enemy_color
                 );
-                return killerPieces.length > 0;
+                if (killerPieces.length > 0) {
+                    result.push([kingPiece, killerPieces]);
+                }
             });
-        if (!!targetKing && killerPieces.length > 0) {
-            this.isInCheckedState = [targetKing, killerPieces];
-        } else {
-            this.isInCheckedState = [targetKing, killerPieces];
-        }
+        this.isInCheckedState = result;
         this.validMovesInCheck = [];
-        return [targetKing, killerPieces];
+        return result;
     };
 
     public checkAllpossibilitiesOfKingsSurvival = (
@@ -303,8 +302,11 @@ class Board {
             allPossibleMoves.forEach((move) => {
                 const newBoard = this.clone();
                 newBoard.movePiece(piece, move[0], move[1]);
-                const result = newBoard.detectCheck()[0];
-                if (!result || result.color === enemy_color) {
+                const result = newBoard.detectCheck();
+                if (
+                    result.length === 0 ||
+                    !result.find((v) => v[0].color === king.color)
+                ) {
                     possibilities.push({
                         position: move,
                         piece: piece,
@@ -317,43 +319,29 @@ class Board {
     };
 
     public detectCheckMate = (): ChessPiece => {
-        const [targetKing, killerPieces] = this.detectCheck();
-        if (!killerPieces) {
-            throw new Error(
-                'how is king threatened if there is no one to kill him?'
-            );
+        const result = this.detectCheck();
+        for (const resultSet of result) {
+            const possibilitiesOfSurvival =
+                this.checkAllpossibilitiesOfKingsSurvival(resultSet[0]);
+            if (possibilitiesOfSurvival.length === 0) {
+                return resultSet[0];
+            }
         }
-        if (!targetKing) {
-            return null;
-        }
-        let possibilitiesOfSurvival = [];
-
-        if (targetKing) {
-            possibilitiesOfSurvival =
-                this.checkAllpossibilitiesOfKingsSurvival(targetKing);
-        }
-        if (possibilitiesOfSurvival.length === 0) {
-            return targetKing;
-        }
-        return null;
     };
 
     public stringify = (): string => {
         const tmp_dynamicValueAtPos: { [key: string]: string } = {};
-        const tmp_isInCheckedState: [string, string[]] | null =
-            this.isInCheckedState === null
-                ? null
-                : [
-                      this.isInCheckedState[0].stringify(),
-                      this.isInCheckedState[1].map((v) => v.stringify()),
-                  ];
+        const tmp_isInCheckedState: [string, string[]][] =
+            this.isInCheckedState.map((resultSet) => [
+                resultSet[0].stringify(),
+                resultSet[1].map((v) => v.stringify()),
+            ]);
         Object.keys(this.dynamicValueAtPos).forEach((v) => {
             if (this.dynamicValueAtPos[v] === undefined) {
                 return;
             }
             tmp_dynamicValueAtPos[v] = this.dynamicValueAtPos[v].stringify();
         });
-
         return JSON.stringify({
             pieces: JSON.stringify(this.pieces.map((p) => p.stringify())),
             dynamicValueAtPos: tmp_dynamicValueAtPos,
@@ -364,7 +352,7 @@ class Board {
         const parsedLiteral: {
             pieces: string;
             dynamicValueAtPos: { [key: string]: string };
-            isInCheckedState: [string, string[]] | null;
+            isInCheckedState: [string, string[]][];
         } = JSON.parse(literal);
         const nBoard = new Board();
         (JSON.parse(parsedLiteral.pieces) as string[])
@@ -395,18 +383,11 @@ class Board {
                 parsedLiteral.dynamicValueAtPos[v]
             );
         });
-        const isInCheckedState: [ChessPiece, ChessPiece[]] =
-            parsedLiteral.isInCheckedState === null
-                ? null
-                : [
-                      constructChessPiecefromLiteral(
-                          parsedLiteral.isInCheckedState[0]
-                      ),
-                      parsedLiteral.isInCheckedState[1].map((v) =>
-                          constructChessPiecefromLiteral(v)
-                      ),
-                  ];
-
+        const isInCheckedState: [ChessPiece, ChessPiece[]][] =
+            parsedLiteral.isInCheckedState.map((v) => [
+                constructChessPiecefromLiteral(v[0]),
+                v[1].map(constructChessPiecefromLiteral),
+            ]);
         nBoard.isInCheckedState = isInCheckedState;
         return nBoard;
     };

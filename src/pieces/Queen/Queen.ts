@@ -44,31 +44,40 @@ class Queen extends ChessPiece {
         }
         return possibilities.filter((move) => {
             const nb = board.clone();
-            nb.movePiece(this, move[0], move[1], true);
-            const newCheck = nb.detectCheck()[0];
-            if (newCheck && newCheck.color === this.color) {
-                return false;
-            } else {
-                return true;
+            const clonedThis = this.clone();
+            nb.movePiece(clonedThis, move[0], move[1], true);
+            const newCheck = nb.detectCheck();
+            for (const checkPiece of newCheck) {
+                if (checkPiece[0].color === this.color) {
+                    return false;
+                }
             }
+            return true;
         });
     };
     isThreateningAtXY: (pos_x: number, pos_y: number, board: Board) => boolean =
         (pos_x, pos_y, board) => {
             assertPositionBounds([pos_x, pos_y]);
             if (
-                Math.abs(pos_x - this.position[0]) !==
-                Math.abs(pos_y - this.position[1])
+                !(
+                    Math.abs(pos_x - this.position[0]) ==
+                        Math.abs(pos_y - this.position[1]) ||
+                    this.position[0] === pos_x ||
+                    this.position[1] === pos_y
+                )
             ) {
                 return false;
             }
-            if (!(pos_x === this.position[0] || pos_y === this.position[1])) {
-                return false;
-            }
             const incr_x =
-                (pos_x - this.position[0]) / Math.abs(pos_x - this.position[0]);
+                pos_x - this.position[0] === 0
+                    ? 0
+                    : (pos_x - this.position[0]) /
+                      Math.abs(pos_x - this.position[0]);
             const incr_y =
-                (pos_y - this.position[1]) / Math.abs(pos_y - this.position[1]);
+                pos_y - this.position[1] === 0
+                    ? 0
+                    : (pos_y - this.position[1]) /
+                      Math.abs(pos_y - this.position[1]);
             let i = -1,
                 j = -1;
             for (
