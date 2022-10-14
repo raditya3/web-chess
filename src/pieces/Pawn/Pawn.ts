@@ -2,9 +2,6 @@ import { Params } from './../Types';
 import { Board } from '../../Board';
 import { assertPositionBounds } from '../../utils/check-position-bounds';
 import { ChessPiece } from '../ChessPiece';
-/**
- * Todo: Implement En passant
- */
 class Pawn extends ChessPiece {
     constructor(param: Params) {
         super(param);
@@ -43,7 +40,28 @@ class Pawn extends ChessPiece {
         const [pos_x, pos_y] = this.position;
         assertPositionBounds([pos_x, pos_y]);
         const possibleMoves = [];
+        const enPassantPiece = board.enPassantPiece;
         if (this.color === 'black' && pos_y - 1 >= 0) {
+            // en passant move
+            if (
+                pos_y === 3 &&
+                enPassantPiece &&
+                enPassantPiece.color === 'white' &&
+                enPassantPiece.position[1] === 3
+            ) {
+                if (
+                    pos_x > 0 &&
+                    enPassantPiece.position[0] === this.position[0] - 1
+                ) {
+                    possibleMoves.push([pos_x - 1, pos_y - 1]);
+                }
+                if (
+                    pos_x < 7 &&
+                    enPassantPiece.position[0] === this.position[0] + 1
+                ) {
+                    possibleMoves.push([pos_x + 1, pos_y - 1]);
+                }
+            }
             // Black moves from bottom to top;
             if (board.getValueAtPos(pos_x, pos_y - 1) === null) {
                 possibleMoves.push([pos_x, pos_y - 1]);
@@ -73,6 +91,25 @@ class Pawn extends ChessPiece {
             }
         }
         if (this.color === 'white' && pos_y + 1 < 8) {
+            if (
+                pos_y === 4 &&
+                enPassantPiece &&
+                enPassantPiece.color === 'black' &&
+                enPassantPiece.position[1] === 4
+            ) {
+                if (
+                    pos_x > 0 &&
+                    enPassantPiece.position[0] === this.position[0] - 1
+                ) {
+                    possibleMoves.push([pos_x - 1, pos_y + 1]);
+                }
+                if (
+                    pos_x < 7 &&
+                    enPassantPiece.position[0] === this.position[0] + 1
+                ) {
+                    possibleMoves.push([pos_x + 1, pos_y + 1]);
+                }
+            }
             // White moves from top to bottom;
             if (board.getValueAtPos(pos_x, pos_y + 1) === null) {
                 possibleMoves.push([pos_x, pos_y + 1]);

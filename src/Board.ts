@@ -10,7 +10,7 @@ import { constructChessPiecefromLiteral } from './utils/chess-piece-factory';
 
 class Board {
     private pieces: ChessPiece[] = [];
-    public enPassantPieces: ChessPiece[] = [];
+    public enPassantPiece: ChessPiece = null;
     private dynamicValueAtPos: { [key: string]: ChessPiece } = {};
     private isInCheckedState: [ChessPiece, ChessPiece[]][] = [];
     private validMovesInCheck: {
@@ -22,6 +22,9 @@ class Board {
         this.pieces.forEach((piece) => {
             newBoard.addChessPiece(piece.clone());
         });
+        newBoard.enPassantPiece = this.enPassantPiece
+            ? this.enPassantPiece.clone()
+            : null;
         return newBoard;
     };
 
@@ -50,6 +53,12 @@ class Board {
                 );
             }
             const currentPiece = piece.clone();
+            if (
+                this.enPassantPiece &&
+                currentPiece.color === this.enPassantPiece.color
+            ) {
+                this.enPassantPiece = null;
+            }
             const originalPos_x = piece.position[0];
             const originalPos_y = piece.position[1];
             if (
@@ -76,8 +85,22 @@ class Board {
                     } else {
                         throw new Error('Invalid Castling');
                     }
+                } else {
+                    throw new Error('Invalid Move');
                 }
             }
+
+            if (
+                currentPiece.name === 'pawn' &&
+                this.enPassantPiece &&
+                this.enPassantPiece.color !== currentPiece.color &&
+                pos_x !== originalPos_x &&
+                this.getValueAtPos(pos_x, pos_y) === null
+            ) {
+                this.removeXY(...this.enPassantPiece.position);
+                this.enPassantPiece = null;
+            }
+
             this.removeXY(originalPos_x, originalPos_y);
             const valueAtNewPos = this.getValueAtPos(pos_x, pos_y);
             if (valueAtNewPos !== null) {
@@ -88,10 +111,32 @@ class Board {
             }
             currentPiece.position[0] = pos_x;
             currentPiece.position[1] = pos_y;
+            if (
+                currentPiece.name === 'pawn' &&
+                Math.abs(originalPos_y - pos_y) === 2
+            ) {
+                this.enPassantPiece = currentPiece;
+            }
             if (currentPiece.name === 'rook' || currentPiece.name === 'king') {
                 currentPiece.specialInfo['moved'] = true;
             }
-            this.addChessPiece(currentPiece);
+
+            // Promotion logic
+            if (
+                currentPiece.name === 'pawn' &&
+                ((currentPiece.color === 'black' && pos_y === 0) ||
+                    (currentPiece.color === 'white' && pos_y === 7))
+            ) {
+                this.addChessPiece(
+                    new PieceClasses.Queen({
+                        color: currentPiece.color,
+                        pos: [pos_x, pos_y],
+                    })
+                );
+            } else {
+                this.addChessPiece(currentPiece);
+            }
+
             this.isInCheckedState = [];
             if (piece.name === 'king') {
                 this.validMovesInCheck = [];
@@ -99,7 +144,7 @@ class Board {
             return true;
         } else if (!validated) {
             throw new Error(
-                `Invalid Move for : ${piece.name} ${piece.position}`
+                `Invalid Move for : ${piece.name} at ${piece.position} toward position ${pos_x}, ${pos_y}`
             );
         }
         return false;
@@ -158,7 +203,7 @@ class Board {
     public removeXY(pos_x: number, pos_y: number) {
         const piece = this.getValueAtPos(pos_x, pos_y);
         if (!piece) {
-            throw new Error(`Not piece found at position : ${[pos_x, pos_y]}`);
+            throw new Error(`No piece found at position : ${[pos_x, pos_y]}`);
         }
         if (pos_x >= 8 || pos_x < 0) {
             throw new Error(`Wrong x position requested ${pos_x}`);
@@ -338,6 +383,10 @@ class Board {
             pieces: JSON.stringify(this.pieces.map((p) => p.stringify())),
             dynamicValueAtPos: tmp_dynamicValueAtPos,
             isInCheckedState: tmp_isInCheckedState,
+            enPassantPieces:
+                this.enPassantPiece === null
+                    ? null
+                    : this.enPassantPiece.stringify(),
         });
     };
     public static parse = (literal: string): Board => {
@@ -345,6 +394,7 @@ class Board {
             pieces: string;
             dynamicValueAtPos: { [key: string]: string };
             isInCheckedState: [string, string[]][];
+            enPassantPieces: string;
         } = JSON.parse(literal);
         const nBoard = new Board();
         (JSON.parse(parsedLiteral.pieces) as string[])
@@ -381,6 +431,9 @@ class Board {
                 v[1].map(constructChessPiecefromLiteral),
             ]);
         nBoard.isInCheckedState = isInCheckedState;
+        nBoard.enPassantPiece = parsedLiteral.enPassantPieces
+            ? constructChessPiecefromLiteral(parsedLiteral.enPassantPieces)
+            : null;
         return nBoard;
     };
 }
