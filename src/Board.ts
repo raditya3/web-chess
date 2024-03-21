@@ -41,8 +41,8 @@ class Board {
     // This function does not mutate the ChessPiece passed as argument
     public movePiece = (
         piece: ChessPiece,
-        pos_x,
-        pos_y,
+        pos_x: number,
+        pos_y: number,
         unsafe = false
     ): boolean => {
         const validated = unsafe ? true : this.validMove(piece, pos_x, pos_y);
